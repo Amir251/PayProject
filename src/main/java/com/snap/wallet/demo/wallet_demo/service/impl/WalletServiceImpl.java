@@ -30,8 +30,7 @@ public class WalletServiceImpl implements WalletService {
     @Override
     @Transactional
     public void increaseUserBalance(String userEmail, BigDecimal newBalance) {
-        String ADMIN_WALLET = "ADMIN_WALLET";
-        Wallet adminWallet = walletRepository.findByAccountNumber(ADMIN_WALLET).orElseThrow(() -> new ApiException(ExceptionMessageCode.WALLET_NOT_FOUND));
+        Wallet adminWallet = findAdminWallet();
         Wallet destWallet = getWalletByEmail(userEmail);
         destWallet.setBalance(newBalance);
         saveTransaction(newBalance, adminWallet, destWallet, "Charged Wallet By Admin!");
@@ -54,6 +53,12 @@ public class WalletServiceImpl implements WalletService {
 
         walletRepository.save(sourceWallet);
         walletRepository.save(destWallet);
+    }
+
+    @Override
+    public Wallet findAdminWallet() {
+        String ADMIN_WALLET = "ADMIN_WALLET";
+        return walletRepository.findByAccountNumber(ADMIN_WALLET).orElseThrow(() -> new ApiException(ExceptionMessageCode.WALLET_NOT_FOUND));
     }
 
     private Wallet getWalletByEmail(String email) {

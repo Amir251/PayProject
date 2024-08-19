@@ -34,7 +34,7 @@ public class FilterChainConfiguration {
                 .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(customRequestContextFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(req -> req
-                        .requestMatchers("api/users/**", "/swagger-ui/**","/v3/**").permitAll()
+                        .requestMatchers("api/users/**", "/swagger-ui/**","/v3/**","api/products/findAllProducts").permitAll()
                         .anyRequest().authenticated()
                 );
         http.addFilterBefore(jwtRequestFilter(), UsernamePasswordAuthenticationFilter.class);

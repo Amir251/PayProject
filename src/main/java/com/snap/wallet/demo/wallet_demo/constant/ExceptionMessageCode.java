@@ -11,4 +11,7 @@ public class ExceptionMessageCode {
     public static final String TOKEN_IS_NOT_VALID = "Token is not valid, you must login first";
     public static final String CURRENT_USER_WALLET_NOT_FOUND = "Current user wallet not found!";
     public static final String BALANCE_NOT_ENOUGH = "Balance not enough!";
+    public static final String PRODUCT_NOT_FOUND = "product not found!";
+    public static final String REQUESTED_QUANTITY_EXCEEDS_AVAILABLE_STOCK = "Requested quantity exceeds available stock!";
+    public static final String THE_TOTAL_AMOUNT_EXCEEDS_YOUR_AVAILABLE_BALANCE = "The total amount exceeds your available balance!";
 }

@@ -1,6 +1,6 @@
 package com.snap.wallet.demo.wallet_demo.repository;
 
-import com.snap.wallet.demo.wallet_demo.model.Wallet;
+import com.snap.wallet.demo.wallet_demo.model.ProductEntity;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -9,11 +9,8 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface WalletRepository extends JpaRepository<Wallet, Long> {
-    Optional<Wallet> findByUserEmail(String email);
-    Optional<Wallet> findByAccountNumber(String accountNumber);
-
+public interface ProductRepository extends JpaRepository<ProductEntity,Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT w FROM Wallet w WHERE w.user.email = :email")
-    Optional<Wallet> findByUserEmailWithLock(@Param("email") String email);
+    @Query("SELECT p FROM ProductEntity p WHERE p.id = :productId")
+    Optional<ProductEntity> findByIdWithLock(@Param("productId") Long productId);
 }
