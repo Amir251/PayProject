@@ -99,12 +99,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateUser(UserRequest userRequest, Long userId) {
         validateEmailAndPhoneForUpdate(userRequest.getEmail(), userRequest.getPhone(), userId);
-        UserEntity userLoaded = userRepository.findById(userId).orElseThrow(() -> new ApiException(ExceptionMessageCode.USER_NOT_FOUND));
+        UserEntity userLoaded = findById(userId);
         userLoaded.setFirstName(userRequest.getFirstName());
         userLoaded.setLastName(userRequest.getLastName());
         userLoaded.setEmail(userRequest.getEmail());
         userLoaded.setPhone(userRequest.getPhone());
         userRepository.save(userLoaded);
+    }
+
+    @Override
+    public UserEntity findById(Long id){
+        return userRepository.findById(id).orElseThrow(() -> new ApiException(ExceptionMessageCode.USER_NOT_FOUND));
     }
 
     @Override

@@ -42,4 +42,11 @@ public class WalletController {
         walletService.increaseUserBalance(userEmail, newBalance);
         return ResponseEntity.ok(getResponse(request, emptyMap(), "Wallet Balance Increased!", HttpStatus.OK));
     }
+
+    @PostMapping("/transferMoneyBetweenTwoAccount")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Response> transferMoneyBetweenTwoAccount(String destEmailAccount,BigDecimal transferAmount,HttpServletRequest request){
+        walletService.transferMoney(destEmailAccount,transferAmount);
+        return ResponseEntity.ok(getResponse(request,emptyMap(),"Transfer Completed",HttpStatus.OK));
+    }
 }

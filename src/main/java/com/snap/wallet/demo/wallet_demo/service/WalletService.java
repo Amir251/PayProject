@@ -5,4 +5,6 @@ import java.math.BigDecimal;
 public interface WalletService {
 
     void increaseUserBalance(String userEmail, BigDecimal newBalance);
+
+    void transferMoney(String destEmailAccount, BigDecimal transferAmount);
 }

@@ -26,4 +26,6 @@ public interface UserService {
     void updateUser(UserRequest userRequest,Long userId);
 
     List<String> findAllUsersEmail();
+
+    UserEntity findById(Long id);
 }
