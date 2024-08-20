@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
         credentialRepository.save(credentialEntity);
         ConfirmationEntity confirmationEntity = new ConfirmationEntity(saved);
         confirmationRepository.save(confirmationEntity);
-        publisher.publishEvent(new UserEvent(saved, EventType.REGISTRATION, Map.of("key", confirmationEntity.getKey())));
+        publisher.publishEvent(new UserEvent(saved, EventType.REGISTRATION, Map.of("key", confirmationEntity.getKey()),null));
     }
 
     @Override

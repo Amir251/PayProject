@@ -2,8 +2,10 @@ package com.snap.wallet.demo.wallet_demo.service.impl;
 
 import com.snap.wallet.demo.wallet_demo.constant.ExceptionMessageCode;
 import com.snap.wallet.demo.wallet_demo.domain.RequestContext;
+import com.snap.wallet.demo.wallet_demo.enumeration.EventType;
 import com.snap.wallet.demo.wallet_demo.enumeration.TransactionStatus;
 import com.snap.wallet.demo.wallet_demo.enumeration.TransactionType;
+import com.snap.wallet.demo.wallet_demo.event.UserEvent;
 import com.snap.wallet.demo.wallet_demo.exception.ApiException;
 import com.snap.wallet.demo.wallet_demo.function.TriConsumer;
 import com.snap.wallet.demo.wallet_demo.model.TransactionEntity;
@@ -15,6 +17,7 @@ import com.snap.wallet.demo.wallet_demo.service.UserService;
 import com.snap.wallet.demo.wallet_demo.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +34,7 @@ public class WalletServiceImpl implements WalletService {
     private final TransactionRepository transactionRepository;
 
     private final UserService userService;
+    private final ApplicationEventPublisher publisher;
 
     @Override
     @Transactional
@@ -39,7 +42,7 @@ public class WalletServiceImpl implements WalletService {
         Wallet adminWallet = null;
         try {
             adminWallet = findAdminWallet();
-            Wallet destWallet = getWalletByEmail.apply(userEmail);
+            Wallet destWallet = getWalletByEmail(userEmail);
             destWallet.setBalance(newBalance);
             saveTransaction(newBalance, adminWallet, destWallet, "Charged Wallet By Admin!", TransactionStatus.SUCCESS);
             walletRepository.save(destWallet);
@@ -60,29 +63,46 @@ public class WalletServiceImpl implements WalletService {
     @Transactional
     public void transferMoney(String destEmailAccount, BigDecimal transferAmount) {
         Wallet sourceWallet = null;
+        StringBuilder successMessage = new StringBuilder();
+        StringBuilder failMessage = new StringBuilder();
+        UserEntity destUser = null;
+        UserEntity currentUser = null;
         try {
-            UserEntity currentUser = userService.findById(RequestContext.getUserId());
-            sourceWallet = getWalletByEmail.apply(currentUser.getEmail());
-            Wallet destWallet = getWalletByEmail.apply(destEmailAccount);
-
+            currentUser = userService.findById(RequestContext.getUserId());
+            sourceWallet = getWalletByEmail(currentUser.getEmail());
+            Wallet destWallet = getWalletByEmail(destEmailAccount);
+            destUser = destWallet.getUser();
             validateSufficientBalance.accept(sourceWallet, transferAmount);
-
             updateBalances.accept(sourceWallet, destWallet, transferAmount);
-
             saveTransaction(transferAmount, sourceWallet, destWallet,
                     String.format("Transfer From %s To %s", sourceWallet.getUser().getEmail(), destEmailAccount), TransactionStatus.SUCCESS);
-
             walletRepository.save(sourceWallet);
             walletRepository.save(destWallet);
+            successMessage.append(String.format("Dear %s,\n\n", destUser.getFirstName()))
+                    .append(String.format("You have received a transfer from %s.\n\n", currentUser.getEmail()))
+                    .append(String.format("Amount: %s\n", transferAmount))
+                    .append(String.format("Your new balance is: %s\n", destWallet.getBalance()))
+                    .append("\nThank you for using our service!");
+
         } catch (Exception e) {
             try {
-                if (sourceWallet != null) {
+                if (currentUser != null && sourceWallet != null) {
                     logFailedTransaction(BigDecimal.ZERO, sourceWallet, sourceWallet, e.getMessage());
+                    failMessage.append(String.format("Dear %s,\n\n", currentUser.getFirstName()))
+                            .append("Unfortunately, your transfer was not successful.\n\n")
+                            .append("If any amount was deducted from your wallet, it will be refunded to your account shortly.\n")
+                            .append("We apologize for the inconvenience and appreciate your understanding.");
                 } else {
                     log.error("Wallet is null, failed to log failed transaction.");
                 }
             } catch (Exception ex) {
                 log.error("Failed to log failed transaction: " + ex.getMessage());
+            }
+        } finally {
+            if (successMessage.length() > 0 && destUser != null) {
+                publisher.publishEvent(new UserEvent(destUser, EventType.TRANSFER, null, successMessage.toString()));
+            } else if (failMessage.length() > 0 && currentUser != null) {
+                publisher.publishEvent(new UserEvent(currentUser, EventType.TRANSFER, null, failMessage.toString()));
             }
         }
     }
@@ -93,8 +113,11 @@ public class WalletServiceImpl implements WalletService {
         return walletRepository.findByAccountNumber(ADMIN_WALLET).orElseThrow(() -> new ApiException(ExceptionMessageCode.WALLET_NOT_FOUND));
     }
 
-    private final Function<String, Wallet> getWalletByEmail = email -> walletRepository.findByUserEmail(email)
-            .orElseThrow(() -> new ApiException(ExceptionMessageCode.CURRENT_USER_WALLET_NOT_FOUND));
+    public Wallet getWalletByEmail(String email) {
+        return walletRepository.findByUserEmail(email)
+                .orElseThrow(() -> new ApiException(ExceptionMessageCode.CURRENT_USER_WALLET_NOT_FOUND));
+    }
+
 
     private final BiConsumer<Wallet, BigDecimal> validateSufficientBalance = (wallet, amount) -> {
         if (wallet.getBalance().subtract(amount).compareTo(BigDecimal.ZERO) < 0) {

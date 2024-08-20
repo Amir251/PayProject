@@ -15,4 +15,5 @@ public class UserEvent {
     private UserEntity user;
     private EventType type;
     private Map<?, ?> data;
+    String transactionMessage;
 }

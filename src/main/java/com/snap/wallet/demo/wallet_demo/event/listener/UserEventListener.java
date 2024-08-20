@@ -1,6 +1,5 @@
 package com.snap.wallet.demo.wallet_demo.event.listener;
 
-import com.snap.wallet.demo.wallet_demo.enumeration.EventType;
 import com.snap.wallet.demo.wallet_demo.event.UserEvent;
 import com.snap.wallet.demo.wallet_demo.service.EmailService;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +13,15 @@ public class UserEventListener {
 
     @EventListener
     public void onUserEvent(UserEvent event) {
-        if (event.getType() == EventType.REGISTRATION) {
-            emailService.sendNewAccountEmail(event.getUser().getFirstName(), event.getUser().getEmail(), (String) event.getData().get("key"));
+        switch (event.getType()) {
+            case REGISTRATION ->
+                    emailService.sendNewAccountEmail(event.getUser().getFirstName(), event.getUser().getEmail(), (String) event.getData().get("key"));
+
+            case PURCHASE -> emailService.sendReportPurchase(event.getUser().getEmail(), event.getTransactionMessage());
+
+            case TRANSFER -> emailService.sendTransferReport(event.getUser().getEmail(), event.getTransactionMessage());
+
+            default -> throw new IllegalArgumentException("Unexpected value: " + event.getType());
         }
     }
 }

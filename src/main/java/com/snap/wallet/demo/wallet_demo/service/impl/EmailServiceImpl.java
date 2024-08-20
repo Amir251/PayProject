@@ -11,7 +11,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import static com.snap.wallet.demo.wallet_demo.util.EmailUtils.getEmailMessage;
-import static com.snap.wallet.demo.wallet_demo.util.EmailUtils.getResetPasswordMessage;
 
 
 @Service
@@ -19,7 +18,8 @@ import static com.snap.wallet.demo.wallet_demo.util.EmailUtils.getResetPasswordM
 @Slf4j
 public class EmailServiceImpl implements EmailService {
     public static final String NEW_USER_ACCOUNT_VERIFICATION = "New User Account Verification";
-    public static final String PASSWORD_RESET_REQUEST = "Password Reset Request";
+    public static final String PURCHASE_REPORT = "Purchase Report";
+    public static final String TRANSFER_REPORT = "Transfer Report";
     private final JavaMailSender sender;
     @Value("${spring.mail.verify.host}")
     private String host;
@@ -36,6 +36,36 @@ public class EmailServiceImpl implements EmailService {
             message.setTo(email);
             message.setText(getEmailMessage(name, host, token));
             sender.send(message);
+        } catch (Exception e) {
+            log.error(e.getLocalizedMessage());
+            throw new ApiException("Unable To Send Email");
+        }
+    }
+
+    @Override
+    public void sendReportPurchase(String email, String message) {
+        try {
+            SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+            simpleMailMessage.setSubject(PURCHASE_REPORT);
+            simpleMailMessage.setFrom(fromEmail);
+            simpleMailMessage.setTo(email);
+            simpleMailMessage.setText(message);
+            sender.send(simpleMailMessage);
+        } catch (Exception e) {
+            log.error(e.getLocalizedMessage());
+            throw new ApiException("Unable To Send Email");
+        }
+    }
+
+    @Override
+    public void sendTransferReport(String email, String message) {
+        try {
+            SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+            simpleMailMessage.setSubject(TRANSFER_REPORT);
+            simpleMailMessage.setFrom(fromEmail);
+            simpleMailMessage.setTo(email);
+            simpleMailMessage.setText(message);
+            sender.send(simpleMailMessage);
         } catch (Exception e) {
             log.error(e.getLocalizedMessage());
             throw new ApiException("Unable To Send Email");
