@@ -11,4 +11,6 @@ public interface WalletService {
     void transferMoney(String destEmailAccount, BigDecimal transferAmount);
 
     Wallet findAdminWallet();
+
+    BigDecimal loadBalanceData();
 }

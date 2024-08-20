@@ -113,6 +113,12 @@ public class WalletServiceImpl implements WalletService {
         return walletRepository.findByAccountNumber(ADMIN_WALLET).orElseThrow(() -> new ApiException(ExceptionMessageCode.WALLET_NOT_FOUND));
     }
 
+    @Override
+    public BigDecimal loadBalanceData() {
+        return walletRepository.findByUser_Id(RequestContext.getUserId())
+                .orElseThrow(()->new ApiException(ExceptionMessageCode.WALLET_NOT_FOUND)).getBalance();
+    }
+
     public Wallet getWalletByEmail(String email) {
         return walletRepository.findByUserEmail(email)
                 .orElseThrow(() -> new ApiException(ExceptionMessageCode.CURRENT_USER_WALLET_NOT_FOUND));

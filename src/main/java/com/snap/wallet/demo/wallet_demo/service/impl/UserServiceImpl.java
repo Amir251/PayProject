@@ -1,6 +1,8 @@
 package com.snap.wallet.demo.wallet_demo.service.impl;
 
 import com.snap.wallet.demo.wallet_demo.constant.ExceptionMessageCode;
+import com.snap.wallet.demo.wallet_demo.domain.RequestContext;
+import com.snap.wallet.demo.wallet_demo.dto.TransactionDto;
 import com.snap.wallet.demo.wallet_demo.dto.User;
 import com.snap.wallet.demo.wallet_demo.dtorequest.UserRequest;
 import com.snap.wallet.demo.wallet_demo.enumeration.EventType;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,6 +39,7 @@ public class UserServiceImpl implements UserService {
     private final ConfirmationRepository confirmationRepository;
     private final WalletRepository walletRepository;
     private final ApplicationEventPublisher publisher;
+    private final TransactionRepository transactionRepository;
 
     @Override
     @Transactional
@@ -46,7 +50,7 @@ public class UserServiceImpl implements UserService {
         credentialRepository.save(credentialEntity);
         ConfirmationEntity confirmationEntity = new ConfirmationEntity(saved);
         confirmationRepository.save(confirmationEntity);
-        publisher.publishEvent(new UserEvent(saved, EventType.REGISTRATION, Map.of("key", confirmationEntity.getKey()),null));
+        publisher.publishEvent(new UserEvent(saved, EventType.REGISTRATION, Map.of("key", confirmationEntity.getKey()), null));
     }
 
     @Override
@@ -108,8 +112,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserEntity findById(Long id){
+    public UserEntity findById(Long id) {
         return userRepository.findById(id).orElseThrow(() -> new ApiException(ExceptionMessageCode.USER_NOT_FOUND));
+    }
+
+    @Override
+    public List<TransactionDto> loadUserTransactions() {
+        return transactionRepository.findTransactionsByUserId(RequestContext.getUserId()).stream().sorted(Comparator.comparing(TransactionEntity::getTimestamp)).map(transactionEntity ->
+                new TransactionDto(transactionEntity.getStatus().name(), transactionEntity.getTimestamp(),
+                        transactionEntity.getTransactionType().name(), transactionEntity.getDestinationWallet().getAccountNumber(), transactionEntity.getAmount())).toList();
     }
 
     @Override

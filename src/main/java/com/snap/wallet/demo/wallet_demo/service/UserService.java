@@ -1,5 +1,6 @@
 package com.snap.wallet.demo.wallet_demo.service;
 
+import com.snap.wallet.demo.wallet_demo.dto.TransactionDto;
 import com.snap.wallet.demo.wallet_demo.dto.User;
 import com.snap.wallet.demo.wallet_demo.dtorequest.UserRequest;
 import com.snap.wallet.demo.wallet_demo.model.CredentialEntity;
@@ -28,4 +29,6 @@ public interface UserService {
     List<String> findAllUsersEmail();
 
     UserEntity findById(Long id);
+
+    List<TransactionDto> loadUserTransactions();
 }
