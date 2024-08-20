@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,7 +54,7 @@ public class ProductController {
     })
     @PatchMapping("/updateProduct")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Response> updateProduct(@RequestBody ProductDto productDto, HttpServletRequest request) {
+    public ResponseEntity<Response> updateProduct(@RequestBody @Valid ProductDto productDto, HttpServletRequest request) {
         productService.updateProduct(productDto);
         return ResponseEntity.created(getUri()).body(getResponse(request, emptyMap(), "Product Updated!", HttpStatus.OK));
     }

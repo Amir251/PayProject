@@ -51,8 +51,9 @@ public class UserResource {
     @PostMapping("/login")
     @Operation(summary = "Login a user", description = "This endpoint handles user login.")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "User logged in successfully"),})
-    public void login(@RequestBody LoginRequest loginRequest) {
+    public void login(@RequestBody @Valid LoginRequest loginRequest) {
     }
+
     @Operation(summary = "Logout user", description = "This endpoint handles user logout.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User logged out successfully")
