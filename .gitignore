@@ -32,8 +32,6 @@ build/
 *.class
 *.jar
 *.war
-Dockerfile
-docker-compose.yml
 .dockerignore
 .env
 secrets.env
