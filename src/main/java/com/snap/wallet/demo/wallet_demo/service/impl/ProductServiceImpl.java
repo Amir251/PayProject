@@ -94,6 +94,8 @@ public class ProductServiceImpl implements ProductService {
                     .append(String.format("Quantity: %d\n", quantity))
                     .append(String.format("Total Price: %s\n", totalAmount))
                     .append("\nThank you for your purchase!");
+        } catch (ApiException e) {
+            throw e;
         } catch (Exception e) {
             try {
                 if (user != null && wallet != null) {
@@ -135,7 +137,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public ProductEntity getProductEntity(Long productId) {
-        return productRepository.findByIdWithLock(productId)
+        return productRepository.findById(productId)
                 .orElseThrow(() -> new ApiException(ExceptionMessageCode.PRODUCT_NOT_FOUND));
     }
 

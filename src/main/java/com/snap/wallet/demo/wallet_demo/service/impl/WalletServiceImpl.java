@@ -46,6 +46,8 @@ public class WalletServiceImpl implements WalletService {
             destWallet.setBalance(newBalance);
             saveTransaction(newBalance, adminWallet, destWallet, "Charged Wallet By Admin!", TransactionStatus.SUCCESS);
             walletRepository.save(destWallet);
+        } catch (ApiException e) {
+            throw e;
         } catch (Exception e) {
             try {
                 if (adminWallet != null) {
@@ -84,6 +86,8 @@ public class WalletServiceImpl implements WalletService {
                     .append(String.format("Your new balance is: %s\n", destWallet.getBalance()))
                     .append("\nThank you for using our service!");
 
+        } catch (ApiException e) {
+            throw e;
         } catch (Exception e) {
             try {
                 if (currentUser != null && sourceWallet != null) {

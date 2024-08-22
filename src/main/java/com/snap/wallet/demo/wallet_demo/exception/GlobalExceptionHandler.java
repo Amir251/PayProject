@@ -45,9 +45,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ApiException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<Response> handleApiException(ApiException ex, HttpServletRequest request) {
-        return new ResponseEntity<>(getResponse(request, null, ex.getMessage(), HttpStatus.NOT_FOUND), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(getResponse(request, null, ex.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
